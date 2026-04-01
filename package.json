@@ -1,7 +1,7 @@
 {
   "name": "ota-black-core",
-  "version": "2.0.0",
-  "description": "Enterprise iOS Deployment Singularity - Void Engine",
+  "version": "3.0.0",
+  "description": "Enterprise iOS Deployment Singularity - Secure Void Engine",
   "scripts": {
     "start": "npx serve .",
     "dev": "vercel dev"
