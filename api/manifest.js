@@ -2,7 +2,7 @@ export default function handler(req, res) {
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-    res.setHeader('Cache-Control', 'no-store, max-age=0'); // إجبار أبل على عدم تخزين الرابط لتجنب أخطاء التثبيت
+    res.setHeader('Cache-Control', 'no-store, max-age=0'); 
 
     if (req.method === 'OPTIONS') {
         res.status(200).end();
@@ -15,7 +15,7 @@ export default function handler(req, res) {
 
     const safeBundleId = bundle_id || 'com.void.blackstore';
     const safeVersion = version || '1.0.0';
-    const safeAppName = app_name || 'هذا التطبيق';
+    const safeAppName = app_name || 'App'; 
     const safeIconUrl = 'https://up6.cc/2026/04/177500568816331.png';
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
