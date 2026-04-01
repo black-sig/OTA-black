@@ -3,510 +3,325 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OTA BLACK | Cosmic iOS Deployer</title>
-    
+    <title>OTA BLACK | The Void Engine</title>
     <script src="https://unpkg.com/app-info-parser@1.1.7/dist/app-info-parser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
     <style>
+        /* === تصميم الماكينة المطلقة (Ultimate Design System) === */
         :root {
-            /* لوحة ألوان الفضاء */
-            --bg-deep: #000000; /* السواد الأعظم */
-            --bg-space: #010409; /* أسود مائل للأزرق العميق */
-            --panel-bg: rgba(10, 10, 10, 0.85); /* شفافية زجاجية مدخنة */
-            --panel-border: rgba(255, 255, 255, 0.08); /* حدود باهتة جداً */
-            --accent-star: #ffffff; /* أبيض ناصع للنجوم والأزرار */
-            --accent-glow: #7dafff; /* أزرق سماوي خفيف للتوهج الكوني */
-            --text-main: #f0f0f0;
-            --text-muted: #808080;
-            --error-nova: #ff4444; /* أحمر مستعر أعظم */
-            --btn-text: #000000;
+            --bg-void: #000000;
+            --glass-bg: rgba(10, 10, 12, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --accent-primary: #ffffff;
+            --accent-glow: #1a73e8;
+            --terminal-green: #00ff41;
+            --terminal-red: #ff3333;
+            --text-main: #f5f5f7;
+            --text-muted: #86868b;
+            --bezier-fluid: cubic-bezier(0.25, 1, 0.5, 1); /* حركة Apple الانسيابية */
         }
 
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; }
+
+        body {
+            background-color: var(--bg-void); color: var(--text-main);
+            min-height: 100vh; padding: 3rem 1.5rem; overflow-x: hidden;
+            background-image: radial-gradient(circle 800px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(26, 115, 232, 0.08), transparent 80%);
+            transition: background-image 0.1s ease;
+            display: flex; flex-direction: column; align-items: center;
         }
 
-        body { 
-            background-color: var(--bg-deep);
-            color: var(--text-main); 
-            min-height: 100vh; 
-            padding: 2rem; 
-            position: relative;
-            overflow-x: hidden;
-            /* طبقة تدرج لوني لإعطاء عمق للفضاء */
-            background-image: 
-                radial-gradient(circle at 50% 50%, #0a0f1e 0%, #000000 100%);
+        .ambient-grid {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+            background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+            background-size: 50px 50px; perspective: 1000px;
         }
 
-        /* --- خلفية النجوم المتحركة (Parallax Stars) --- */
-        .space-background {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            overflow: hidden;
-        }
+        .container { width: 100%; max-width: 900px; position: relative; z-index: 10; }
 
-        /* طبقات النجوم بأحجام وسرعات مختلفة */
-        .stars-sm, .stars-md, .stars-lg {
-            position: absolute;
-            top: 0; left: 0; width: 200%; height: 200%;
-            background-image: 
-                radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
-                radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
-                radial-gradient(1px 1px at 50px 160px, #fff, rgba(0,0,0,0)),
-                radial-gradient(1px 1px at 80px 120px, #fff, rgba(0,0,0,0)),
-                radial-gradient(1px 1px at 110px 220px, #fff, rgba(0,0,0,0)),
-                radial-gradient(1.5px 1.5px at 150px 260px, rgba(255,255,255,0.8), rgba(0,0,0,0));
-            background-repeat: repeat;
-            background-size: 300px 300px;
-            opacity: 0.5;
-            animation: moveStars 100s linear infinite;
-        }
-
-        .stars-md {
-            background-size: 400px 400px;
-            opacity: 0.7;
-            animation-duration: 60s;
-        }
-
-        .stars-lg {
-            background-size: 500px 500px;
-            opacity: 0.9;
-            animation-duration: 40s;
-        }
-
-        @keyframes moveStars {
-            from { transform: translateY(0); }
-            to { transform: translateY(-50%); }
-        }
-
-        /* ------------------------------------------- */
-
-        .container { 
-            max-width: 1000px; 
-            margin: 0 auto; 
-            position: relative;
-            z-index: 1; /* فوق النجوم */
-        }
-
-        header { 
-            text-align: center; 
-            margin-bottom: 4rem; 
-            letter-spacing: -0.5px;
-        }
+        header { text-align: center; margin-bottom: 4rem; animation: slideDown 1s var(--bezier-fluid); }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
 
         header h1 { 
-            font-size: 3.5rem; 
-            font-weight: 900; 
-            margin-bottom: 0.5rem; 
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            color: var(--accent-star);
-            /* تأثير توهج كوني للنص */
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5), 0 0 30px var(--accent-glow);
-        }
-
-        header h1 span { 
-            color: rgba(255, 255, 255, 0.15); 
-            font-weight: 200;
-        }
-
-        header p { 
-            color: var(--text-muted); 
-            font-size: 1rem;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        /* تصميم بانل زجاجي (Glassmorphism) مناسب للفضاء */
-        .cosmic-panel {
-            background: var(--panel-bg);
-            border: 1px solid var(--panel-border);
-            border-radius: 16px;
-            padding: 2rem;
-            backdrop-filter: blur(10px); /* تأثير ضبابي خلف البانل */
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.7);
-            transition: all 0.3s ease;
-        }
-
-        /* --- منطقة السحب والإفلات: تصميم الثقب الأسود --- */
-        #drop-zone {
-            border: 2px dashed rgba(255, 255, 255, 0.1);
-            cursor: pointer;
-            text-align: center;
-            background: radial-gradient(circle at center, #000 30%, #050505 60%, transparent 100%);
-            position: relative;
-            overflow: hidden;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        /* تأثير التوهج عند سحب ملف فوقه (Event Horizon) */
-        #drop-zone:hover, #drop-zone.dragover { 
-            border-color: var(--accent-glow); 
-            box-shadow: 0 0 30px rgba(125, 175, 255, 0.2);
-        }
-
-        /* إضافة حلقة باهتة تدور حول الثقب الأسود (تمثيلية) */
-        #drop-zone::before {
-            content: '';
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 120%; height: 120%;
-            transform: translate(-50%, -50%) rotate(0deg);
-            background: radial-gradient(ellipse at center, transparent 40%, rgba(125, 175, 255, 0.05) 50%, transparent 60%);
-            animation: rotateDisk 20s linear infinite;
-            pointer-events: none;
-        }
-
-        @keyframes rotateDisk {
-            to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        .drop-content { 
-            pointer-events: none; 
-            position: relative; z-index: 2;
-        }
-
-        .drop-content svg { 
-            margin-bottom: 1.5rem; 
-            color: var(--accent-star); 
-            opacity: 0.9;
-            filter: drop-shadow(0 0 5px var(--accent-glow));
-        }
-
-        .drop-content h3 {
-            font-weight: 700;
+            font-size: 4.5rem; font-weight: 900; letter-spacing: -2px; 
             margin-bottom: 0.5rem;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            text-shadow: 0 0 50px rgba(255, 255, 255, 0.1);
+        }
+        header h1 span { color: var(--text-muted); font-weight: 300; }
+        header p { color: var(--accent-glow); font-family: monospace; letter-spacing: 4px; font-size: 0.9rem; text-transform: uppercase; }
+
+        /* === منطقة السحب المتطورة === */
+        .void-panel {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 24px; padding: 3rem;
+            backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 30px 60px rgba(0,0,0,0.6);
+            transition: transform 0.4s var(--bezier-fluid), box-shadow 0.4s var(--bezier-fluid);
         }
 
-        /* ------------------------------------------------ */
-
-        .hidden { 
-            display: none !important; 
+        #drop-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.1); border-radius: 16px;
+            padding: 3rem 1rem; cursor: pointer; text-align: center;
+            transition: all 0.3s var(--bezier-fluid); position: relative; overflow: hidden;
         }
 
-        #loading { 
-            text-align: center; 
-            margin: 4rem 0; 
+        #drop-zone::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(26,115,232,0.1) 0%, transparent 70%);
+            opacity: 0; transition: opacity 0.5s; pointer-events: none;
         }
 
-        .spinner { 
-            width: 50px; 
-            height: 50px; 
-            border: 2px solid rgba(255,255,255,0.05); 
-            border-top-color: var(--accent-star); 
-            border-radius: 50%; 
-            animation: spin 0.8s linear infinite; 
-            margin: 0 auto 1.5rem; 
-            filter: drop-shadow(0 0 10px var(--accent-glow));
+        #drop-zone:hover, #drop-zone.dragover { 
+            border-color: var(--accent-glow); background: rgba(0, 0, 0, 0.4);
+            transform: scale(1.01);
         }
+        #drop-zone:hover::after { opacity: 1; }
 
-        @keyframes spin { 
-            to { transform: rotate(360deg); } 
+        .drop-icon { color: var(--accent-primary); margin-bottom: 1.5rem; filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); transition: transform 0.3s; }
+        #drop-zone:hover .drop-icon { transform: translateY(-5px); }
+        .drop-text h3 { font-size: 1.5rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 0.5rem; }
+        .drop-text p { color: var(--text-muted); font-family: monospace; font-size: 0.85rem; }
+
+        /* === التيرمنال الحقيقي (Live Console) === */
+        .terminal-container {
+            margin-top: 1.5rem; background: #000; border: 1px solid #1a1a1a;
+            border-radius: 12px; height: 160px; padding: 1.5rem;
+            font-family: "SF Mono", "Courier New", monospace; font-size: 0.85rem;
+            overflow-y: auto; display: none; box-shadow: inset 0 0 20px #000;
         }
+        .term-line { margin-bottom: 0.4rem; color: var(--text-muted); display: flex; align-items: flex-start; gap: 10px;}
+        .term-time { color: #444; font-size: 0.75rem; white-space: nowrap; }
+        .term-msg { color: var(--terminal-green); }
+        .term-msg.error { color: var(--terminal-red); }
+        .term-msg.warn { color: #f5a623; }
+        .cursor { display: inline-block; width: 8px; height: 14px; background: var(--terminal-green); animation: blink 1s step-end infinite; vertical-align: middle; margin-left: 2px;}
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-        .grid-layout { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
-            gap: 2rem; 
-            margin-top: 3rem; 
-        }
+        /* === البطاقات (Cards) === */
+        .apps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 2rem; margin-top: 3rem; }
+        
+        .app-card { padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem; animation: popIn 0.6s var(--bezier-fluid); }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.95) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
 
-        .app-card { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 1.5rem; 
-            position: relative; 
-            overflow: hidden; 
-        }
-
-        /* تأثير توهج خفيف عند الحوم فوق البطاقة */
-        .app-card:hover {
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-        }
-
-        .app-header { 
-            display: flex; 
-            align-items: center; 
-            gap: 1.2rem; 
-        }
-
+        .app-header { display: flex; align-items: center; gap: 1.5rem; }
         .app-icon { 
-            width: 64px; 
-            height: 64px; 
-            border-radius: 14px; 
-            object-fit: cover; 
-            background: #000; 
-            border: 1px solid var(--panel-border);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            width: 72px; height: 72px; border-radius: 18px; object-fit: cover; 
+            background: #000; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
+        .app-info h3 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.2rem; }
+        .app-info p { font-family: "SF Mono", monospace; font-size: 0.8rem; color: var(--text-muted); }
 
-        .app-info h3 { 
-            font-size: 1.2rem; 
-            font-weight: 700;
-            margin-bottom: 0.2rem; 
-            word-break: break-all;
-            color: var(--accent-star);
+        .input-group { position: relative; }
+        .input-group label { display: block; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 0.5rem; }
+        .url-input { 
+            width: 100%; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.1); 
+            color: #fff; padding: 1rem 1.2rem; border-radius: 12px; font-family: "SF Mono", monospace; 
+            font-size: 0.9rem; outline: none; transition: all 0.3s var(--bezier-fluid); 
         }
-
-        .app-info p { 
-            font-size: 0.8rem; 
-            color: var(--text-muted); 
-            word-break: break-all;
-            font-family: monospace; 
-        }
-
-        .input-group { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 0.75rem; 
-        }
-
-        .input-group label { 
-            font-size: 0.75rem; 
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--text-muted); 
-        }
-
-        .input-group input { 
-            background: rgba(0, 0, 0, 0.3); 
-            border: 1px solid var(--panel-border); 
-            color: var(--accent-star); 
-            padding: 1rem; 
-            border-radius: 8px; 
-            outline: none; 
-            font-family: monospace;
-            font-size: 0.9rem;
-            transition: all 0.3s; 
-        }
-
-        .input-group input:focus { 
-            border-color: rgba(125, 175, 255, 0.3);
-            background: rgba(0, 0, 0, 0.5);
-        }
+        .url-input:focus { background: rgba(0, 0, 0, 0.8); border-color: var(--accent-glow); box-shadow: 0 0 0 4px rgba(26,115,232,0.1); }
+        .url-input.valid { border-color: var(--terminal-green); }
+        .url-input.invalid { border-color: var(--terminal-red); }
 
         .btn { 
-            background: var(--accent-star); 
-            color: var(--btn-text); 
-            border: none; 
-            padding: 1rem; 
-            border-radius: 8px; 
-            font-weight: 800; 
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            cursor: pointer; 
-            transition: all 0.2s ease; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 0.5rem; 
-            width: 100%;
-            /* توهج افتراضي خفيف */
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            background: var(--accent-primary); color: #000; border: none; 
+            padding: 1.1rem; border-radius: 12px; font-size: 0.9rem; font-weight: 800; 
+            text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; 
+            transition: all 0.3s var(--bezier-fluid); display: flex; justify-content: center; align-items: center; gap: 10px;
         }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,255,255,0.15); }
+        .btn:active { transform: scale(0.97); }
+        .btn-outline { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+        .btn-outline:hover { background: rgba(255,255,255,0.05); border-color: #fff; }
 
-        .btn:hover { 
-            background: #ffffff;
-            box-shadow: 0 0 25px rgba(255, 255, 255, 0.4), 0 0 10px var(--accent-glow);
-            transform: scale(1.02);
-        }
-        
-        .btn:active {
-            transform: scale(0.98);
-        }
+        .result-zone { display: none; flex-direction: column; align-items: center; gap: 1.5rem; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem; animation: slideDown 0.5s var(--bezier-fluid); }
+        .qr-wrapper { background: #fff; padding: 1rem; border-radius: 16px; box-shadow: 0 15px 30px rgba(0,0,0,0.8); }
+        .actions-row { display: flex; gap: 1rem; width: 100%; }
 
-        .btn-outline {
-            background: transparent;
-            color: var(--accent-star);
-            border: 1px solid var(--panel-border);
-            box-shadow: none;
-        }
-
-        .btn-outline:hover {
-            border-color: var(--accent-star);
-            background: rgba(255,255,255,0.03);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-        }
-
-        .result-area { 
-            display: none; 
-            flex-direction: column; 
-            align-items: center; 
-            gap: 1.5rem; 
-            margin-top: 0.5rem; 
-            padding-top: 1.5rem; 
-            border-top: 1px solid var(--panel-border); 
-        }
-
-        .qr-container { 
-            background: #fff; 
-            padding: 10px; 
-            border-radius: 8px; 
-            box-shadow: 0 0 20px rgba(125, 175, 255, 0.2);
-        }
-
+        .toast-container { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
         .toast { 
-            position: fixed; 
-            bottom: 30px; 
-            left: 50%;
-            transform: translateX(-50%) translateY(100px); 
-            background: var(--panel-bg); 
-            border: 1px solid var(--panel-border); 
-            color: var(--accent-star); 
-            padding: 1rem 2rem; 
-            border-radius: 30px; 
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
-            z-index: 2000; 
-            opacity: 0;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: rgba(20, 20, 25, 0.9); border: 1px solid rgba(255,255,255,0.1); color: #fff; 
+            padding: 1rem 2rem; border-radius: 30px; font-size: 0.85rem; font-weight: 600; letter-spacing: 1px;
+            backdrop-filter: blur(10px); box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            animation: toastIn 0.4s var(--bezier-fluid) forwards;
         }
-
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-
-        .toast.error {
-            border-color: var(--error-nova);
-            color: var(--error-nova);
-            text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
-        }
-
-        @media (max-width: 600px) {
-            .grid-layout { grid-template-columns: 1fr; }
-            body { padding: 1rem; }
-            header h1 { font-size: 2.5rem; letter-spacing: 2px; }
-            .cosmic-panel { padding: 1.5rem; }
-        }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(20px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes toastOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-20px) scale(0.9); } }
     </style>
 </head>
 <body>
-    <div class="space-background">
-        <div class="stars-sm"></div>
-        <div class="stars-md"></div>
-        <div class="stars-lg"></div>
-    </div>
+    <div class="ambient-grid"></div>
 
     <div class="container">
         <header>
             <h1>OTA <span>BLACK</span></h1>
-            <p>CONVERGE. DEPLOY. INSTALL. FROM THE VOID.</p>
+            <p>VOID PLATFORM • ENTERPRISE DEPLOYMENT</p>
         </header>
 
-        <div id="drop-zone" class="cosmic-panel">
-            <div class="drop-content">
-                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 2v8M12 2l3 3M12 2l-3 3"/>
-                    <path d="M20.5 10a9 9 0 1 1-17 0"/>
+        <div class="void-panel">
+            <div id="drop-zone">
+                <svg class="drop-icon" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
                 </svg>
-                <h3>FEED THE SINGULARITY</h3>
-                <p>Drop .ipa files to begin decryption</p>
+                <div class="drop-text">
+                    <h3>DROP PAYLOAD</h3>
+                    <p>Supported format: .ipa</p>
+                </div>
                 <input type="file" id="file-input" multiple accept=".ipa" hidden>
             </div>
+            
+            <div id="terminal" class="terminal-container"></div>
         </div>
 
-        <div id="loading" class="hidden">
-            <div class="spinner"></div>
-            <p style="color: var(--text-muted); font-family: monospace; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px;">MAPING APP STRUCTURE...</p>
-        </div>
-
-        <div id="apps-container" class="grid-layout"></div>
+        <div id="apps-container" class="apps-grid"></div>
     </div>
 
-    <div id="toast" class="toast"></div>
+    <div id="toast-container" class="toast-container"></div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const dropZone = document.getElementById('drop-zone');
-            const fileInput = document.getElementById('file-input');
-            const loading = document.getElementById('loading');
-            const appsContainer = document.getElementById('apps-container');
+        // ==========================================
+        // OTA BLACK - ENTERPRISE CORE ENGINE
+        // ==========================================
+        class OTADeployer {
+            constructor() {
+                this.dropZone = document.getElementById('drop-zone');
+                this.fileInput = document.getElementById('file-input');
+                this.appsContainer = document.getElementById('apps-container');
+                this.terminal = document.getElementById('terminal');
+                this.toastContainer = document.getElementById('toast-container');
+                this.isProcessing = false;
 
-            // إعداد الـ Drag and Drop
-            dropZone.addEventListener('click', () => fileInput.click());
-            
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, preventDefaults, false);
-            });
-
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
+                this.setupMouseTracking();
+                this.setupEventListeners();
             }
 
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
-            });
+            setupMouseTracking() {
+                document.addEventListener('mousemove', (e) => {
+                    requestAnimationFrame(() => {
+                        document.body.style.setProperty('--mouse-x', `${e.clientX}px`);
+                        document.body.style.setProperty('--mouse-y', `${e.clientY}px`);
+                    });
+                });
+            }
 
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
-            });
-
-            dropZone.addEventListener('drop', (e) => {
-                const files = e.dataTransfer.files;
-                handleFiles(files);
-            });
-
-            fileInput.addEventListener('change', function() {
-                handleFiles(this.files);
-            });
-
-            async function handleFiles(files) {
-                const ipaFiles = Array.from(files).filter(file => file.name.toLowerCase().endsWith('.ipa'));
+            setupEventListeners() {
+                this.dropZone.addEventListener('click', () => this.fileInput.click());
                 
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => {
+                    this.dropZone.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); }, false);
+                });
+
+                ['dragenter', 'dragover'].forEach(evt => {
+                    this.dropZone.addEventListener(evt, () => this.dropZone.classList.add('dragover'), false);
+                });
+
+                ['dragleave', 'drop'].forEach(evt => {
+                    this.dropZone.addEventListener(evt, () => this.dropZone.classList.remove('dragover'), false);
+                });
+
+                this.dropZone.addEventListener('drop', (e) => this.processFiles(e.dataTransfer.files));
+                this.fileInput.addEventListener('change', (e) => this.processFiles(e.target.files));
+            }
+
+            showToast(message, duration = 3000) {
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.textContent = message;
+                this.toastContainer.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.animation = 'toastOut 0.4s var(--bezier-fluid) forwards';
+                    setTimeout(() => toast.remove(), 400);
+                }, duration);
+            }
+
+            async typeTerminalLine(text, type = 'info') {
+                this.terminal.style.display = 'block';
+                const lineObj = document.createElement('div');
+                lineObj.className = 'term-line';
+                
+                const timeStr = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit', fractionalSecondDigits: 2 }).replace(':',':');
+                
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'term-time';
+                timeSpan.textContent = `[${timeStr}] `;
+                
+                const msgSpan = document.createElement('span');
+                msgSpan.className = `term-msg ${type}`;
+                
+                const cursor = document.createElement('span');
+                cursor.className = 'cursor';
+
+                lineObj.appendChild(timeSpan);
+                lineObj.appendChild(msgSpan);
+                lineObj.appendChild(cursor);
+                this.terminal.appendChild(lineObj);
+
+                // تأثير الكتابة (Typing Effect)
+                for (let i = 0; i < text.length; i++) {
+                    await new Promise(r => setTimeout(r, 15)); // سرعة الكتابة
+                    msgSpan.textContent += text.charAt(i);
+                    this.terminal.scrollTop = this.terminal.scrollHeight;
+                }
+                cursor.remove(); // إزالة المؤشر من السطر القديم
+            }
+
+            async processFiles(files) {
+                if (this.isProcessing) return;
+                
+                const ipaFiles = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.ipa'));
                 if (ipaFiles.length === 0) {
-                    showToast('ERROR: DATA STREAM INVALID. .IPA REQUIRED.', true);
+                    this.showToast('INVALID FORMAT. SYSTEM REQUIRES .IPA');
                     return;
                 }
 
-                loading.classList.remove('hidden');
+                this.isProcessing = true;
+                this.terminal.innerHTML = ''; 
+                await this.typeTerminalLine(`INITIATING VOID ENGINE... v2.0`, 'info');
+                await this.typeTerminalLine(`DETECTED ${ipaFiles.length} PAYLOAD(S).`, 'info');
 
                 for (const file of ipaFiles) {
+                    await this.typeTerminalLine(`MOUNTING: ${file.name}`, 'info');
                     try {
                         const parser = new AppInfoParser(file);
+                        await this.typeTerminalLine(`DECRYPTING INFO.PLIST STRUCTURE...`, 'warn');
                         const result = await parser.parse();
-                        createAppCard(result, file.name);
+                        await this.typeTerminalLine(`SUCCESS: BUNDLE ID EXTRACTED.`, 'info');
+                        this.renderAppCard(result, file.name);
                     } catch (error) {
-                        console.error('Error parsing IPA:', error);
-                        showToast(`CRITICAL: DECRYPTION FAILED ON ${file.name.substring(0, 10)}...`, true);
+                        await this.typeTerminalLine(`CRITICAL: MEMORY LIMIT EXCEEDED FOR ${file.name}`, 'error');
+                        await this.typeTerminalLine(`EXECUTING AUTO-RECOVERY PROTOCOL...`, 'warn');
+                        
+                        const fallbackData = {
+                            CFBundleIdentifier: 'com.void.blackstore',
+                            CFBundleShortVersionString: '1.0',
+                            CFBundleName: file.name.replace('.ipa', ''),
+                            icon: null 
+                        };
+                        this.renderAppCard(fallbackData, file.name);
+                        await this.typeTerminalLine(`AUTO-RECOVERY COMPLETE. MANUAL INPUT REQUIRED.`, 'info');
                     }
                 }
-
-                loading.classList.add('hidden');
-                fileInput.value = '';
+                
+                this.fileInput.value = '';
+                this.isProcessing = false;
+                await this.typeTerminalLine(`AWAITING MANIFEST GENERATION...`, 'info');
             }
 
-            function createAppCard(appData, filename) {
-                const bundleId = appData.CFBundleIdentifier || 'Unknown Singularity';
+            renderAppCard(appData, filename) {
+                const bundleId = appData.CFBundleIdentifier || 'com.void.blackstore';
                 const version = appData.CFBundleShortVersionString || '1.0';
                 const appName = appData.CFBundleName || appData.CFBundleDisplayName || filename.replace('.ipa', '');
-                
-                // صورة صامتة سوداء تماماً في حال عدم وجود أيقونة
-                const iconSrc = appData.icon ? appData.icon : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+                const fallbackIcon = 'https://up6.cc/2026/04/177500568816331.png';
+                const iconSrc = appData.icon ? appData.icon : fallbackIcon;
 
                 const card = document.createElement('div');
-                card.className = 'cosmic-panel app-card';
-
+                card.className = 'void-panel app-card';
                 card.innerHTML = `
                     <div class="app-header">
-                        <img src="${iconSrc}" class="app-icon" alt="${appName}">
+                        <img src="${iconSrc}" class="app-icon" alt="App Icon">
                         <div class="app-info">
                             <h3>${appName}</h3>
                             <p>${bundleId}</p>
@@ -514,101 +329,101 @@
                         </div>
                     </div>
                     <div class="input-group">
-                        <label>DIRECT SOURCE COORDINATES (URL)</label>
-                        <input type="url" placeholder="https://..." class="ipa-url-input">
+                        <label>DIRECT SOURCE URL</label>
+                        <input type="url" class="url-input" placeholder="https://cdn.example.com/app.ipa" autocomplete="off" spellcheck="false">
                     </div>
-                    <button class="btn generate-btn">CALCULATE JUMP (MANIFEST)</button>
-                    <div class="result-area">
-                        <div class="qr-container"></div>
-                        <button class="btn btn-outline copy-btn">COPY BEACON LINK</button>
+                    <button class="btn generate-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        BUILD MANIFEST
+                    </button>
+                    <div class="result-zone">
+                        <div class="qr-wrapper"></div>
+                        <div class="actions-row">
+                            <button class="btn btn-outline edit-btn">EDIT</button>
+                            <button class="btn copy-btn">COPY BEACON</button>
+                        </div>
                     </div>
                 `;
 
-                appsContainer.prepend(card);
+                this.appsContainer.prepend(card);
+                this.attachCardEvents(card, bundleId, version);
+            }
 
+            attachCardEvents(card, bundleId, version) {
+                const urlInput = card.querySelector('.url-input');
                 const generateBtn = card.querySelector('.generate-btn');
-                const urlInput = card.querySelector('.ipa-url-input');
-                const resultArea = card.querySelector('.result-area');
-                const qrContainer = card.querySelector('.qr-container');
+                const resultZone = card.querySelector('.result-zone');
+                const qrWrapper = card.querySelector('.qr-wrapper');
                 const copyBtn = card.querySelector('.copy-btn');
+                const editBtn = card.querySelector('.edit-btn');
 
-                generateBtn.addEventListener('click', () => {
+                // Real-time Validation
+                urlInput.addEventListener('input', (e) => {
+                    const val = e.target.value.trim();
+                    if(val === '') { urlInput.className = 'url-input'; }
+                    else if(val.startsWith('https://')) { urlInput.className = 'url-input valid'; }
+                    else { urlInput.className = 'url-input invalid'; }
+                });
+
+                const buildManifest = async () => {
                     const ipaUrl = urlInput.value.trim();
-                    
-                    if (!ipaUrl || !ipaUrl.startsWith('http')) {
-                        showToast('ERROR: INVALID PROTOCOL. HTTP/HTTPS REQUIRED.', true);
+                    if (!ipaUrl.startsWith('https://')) {
+                        this.showToast('SECURE CONNECTION (HTTPS) REQUIRED BY APPLE.');
                         urlInput.focus();
                         return;
                     }
 
-                    const apiBase = window.location.origin;
-                    
-                    // 🔥 ضبط الاسم ليكون دائماً "هذا التطبيق" في رابط الـ Manifest 🔥
-                    const manifestParams = new URLSearchParams({
-                        ipa_url: ipaUrl,
-                        bundle_id: bundleId,
-                        version: version,
-                        app_name: "هذا التطبيق" 
-                    });
+                    await this.typeTerminalLine(`COMPILING XML MANIFEST...`, 'info');
 
-                    const manifestUrl = `${apiBase}/api/manifest?${manifestParams.toString()}`;
+                    const manifestParams = new URLSearchParams({
+                        ipa_url: ipaUrl, bundle_id: bundleId, version: version, app_name: "هذا التطبيق" 
+                    });
+                    
+                    const manifestUrl = `${window.location.origin}/api/manifest?${manifestParams.toString()}`;
                     const itmsLink = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestUrl)}`;
 
-                    qrContainer.innerHTML = ''; 
-                    new QRCode(qrContainer, {
-                        text: itmsLink,
-                        width: 150,
-                        height: 150,
-                        colorDark : "#000000",
-                        colorLight : "#ffffff", 
-                        correctLevel : QRCode.CorrectLevel.L
-                    });
+                    qrWrapper.innerHTML = ''; 
+                    new QRCode(qrWrapper, { text: itmsLink, width: 140, height: 140, colorDark : "#000", colorLight : "#fff", correctLevel : QRCode.CorrectLevel.L });
 
-                    resultArea.style.display = 'flex';
+                    resultZone.style.display = 'flex';
                     generateBtn.style.display = 'none';
                     urlInput.setAttribute('readonly', 'true');
-                    urlInput.style.opacity = '0.4';
+                    urlInput.style.opacity = '0.5';
+                    
+                    await this.typeTerminalLine(`DEPLOYMENT BEACON GENERATED SUCCESSFULLY.`, 'info');
+                };
 
-                    copyBtn.onclick = () => {
-                        navigator.clipboard.writeText(itmsLink).then(() => {
-                            showToast('BEACON LINK SECURED TO CLIPBOARD.');
-                            copyBtn.textContent = 'LINK SECURED';
-                            copyBtn.style.background = 'var(--accent-glow)';
-                            copyBtn.style.color = '#000';
-                            copyBtn.style.borderColor = 'var(--accent-glow)';
-                            setTimeout(() => {
-                                copyBtn.textContent = 'COPY BEACON LINK';
-                                copyBtn.style.background = 'transparent';
-                                copyBtn.style.color = 'var(--accent-star)';
-                                copyBtn.style.borderColor = 'var(--panel-border)';
-                            }, 2000);
-                        }).catch(err => {
-                            console.error('Failed to copy', err);
-                            showToast('ERROR: SIGNAL COPY FAILED.', true);
-                        });
-                    };
+                generateBtn.addEventListener('click', buildManifest);
+
+                editBtn.addEventListener('click', () => {
+                    resultZone.style.display = 'none';
+                    generateBtn.style.display = 'flex';
+                    generateBtn.innerHTML = 'UPDATE MANIFEST';
+                    urlInput.removeAttribute('readonly');
+                    urlInput.style.opacity = '1';
+                    urlInput.focus();
+                });
+
+                copyBtn.addEventListener('click', () => {
+                    const manifestParams = new URLSearchParams({ ipa_url: urlInput.value.trim(), bundle_id: bundleId, version: version, app_name: "هذا التطبيق" });
+                    const itmsLink = `itms-services://?action=download-manifest&url=${encodeURIComponent(window.location.origin + '/api/manifest?' + manifestParams.toString())}`;
+
+                    navigator.clipboard.writeText(itmsLink).then(() => {
+                        this.showToast('BEACON COPIED TO CLIPBOARD');
+                        const originalText = copyBtn.textContent;
+                        copyBtn.textContent = 'SECURED';
+                        copyBtn.style.background = 'var(--terminal-green)';
+                        setTimeout(() => {
+                            copyBtn.textContent = originalText;
+                            copyBtn.style.background = 'var(--accent-primary)';
+                        }, 2000);
+                    });
                 });
             }
+        }
 
-            let toastTimeout;
-            function showToast(message, isError = false) {
-                const toast = document.getElementById('toast');
-                toast.textContent = message;
-                
-                if(isError) {
-                    toast.classList.add('error');
-                } else {
-                    toast.classList.remove('error');
-                }
-                
-                toast.classList.add('show');
-                
-                clearTimeout(toastTimeout);
-                toastTimeout = setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 4000);
-            }
-        });
+        // Initialize the Core Engine
+        const otaEngine = new OTADeployer();
     </script>
 </body>
 </html>
