@@ -1,0 +1,12 @@
+{
+  "name": "ota-black-deployer",
+  "version": "1.1.0",
+  "description": "Cosmic OTA Manifest Generator - Void Edition",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "vercel dev"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}
