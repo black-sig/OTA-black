@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTA BLACK | Cosmic iOS Deployer</title>
+    
+    <script src="https://unpkg.com/app-info-parser@1.1.7/dist/app-info-parser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        :root {
+            /* لوحة ألوان الفضاء */
+            --bg-deep: #000000; /* السواد الأعظم */
+            --bg-space: #010409; /* أسود مائل للأزرق العميق */
+            --panel-bg: rgba(10, 10, 10, 0.85); /* شفافية زجاجية مدخنة */
+            --panel-border: rgba(255, 255, 255, 0.08); /* حدود باهتة جداً */
+            --accent-star: #ffffff; /* أبيض ناصع للنجوم والأزرار */
+            --accent-glow: #7dafff; /* أزرق سماوي خفيف للتوهج الكوني */
+            --text-main: #f0f0f0;
+            --text-muted: #808080;
+            --error-nova: #ff4444; /* أحمر مستعر أعظم */
+            --btn-text: #000000;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+        }
+
+        body { 
+            background-color: var(--bg-deep);
+            color: var(--text-main); 
+            min-height: 100vh; 
+            padding: 2rem; 
+            position: relative;
+            overflow-x: hidden;
+            /* طبقة تدرج لوني لإعطاء عمق للفضاء */
+            background-image: 
+                radial-gradient(circle at 50% 50%, #0a0f1e 0%, #000000 100%);
+        }
+
+        /* --- خلفية النجوم المتحركة (Parallax Stars) --- */
+        .space-background {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        /* طبقات النجوم بأحجام وسرعات مختلفة */
+        .stars-sm, .stars-md, .stars-lg {
+            position: absolute;
+            top: 0; left: 0; width: 200%; height: 200%;
+            background-image: 
+                radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 50px 160px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 80px 120px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 110px 220px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 150px 260px, rgba(255,255,255,0.8), rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 300px 300px;
+            opacity: 0.5;
+            animation: moveStars 100s linear infinite;
+        }
+
+        .stars-md {
+            background-size: 400px 400px;
+            opacity: 0.7;
+            animation-duration: 60s;
+        }
+
+        .stars-lg {
+            background-size: 500px 500px;
+            opacity: 0.9;
+            animation-duration: 40s;
+        }
+
+        @keyframes moveStars {
+            from { transform: translateY(0); }
+            to { transform: translateY(-50%); }
+        }
+
+        /* ------------------------------------------- */
+
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            position: relative;
+            z-index: 1; /* فوق النجوم */
+        }
+
+        header { 
+            text-align: center; 
+            margin-bottom: 4rem; 
+            letter-spacing: -0.5px;
+        }
+
+        header h1 { 
+            font-size: 3.5rem; 
+            font-weight: 900; 
+            margin-bottom: 0.5rem; 
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--accent-star);
+            /* تأثير توهج كوني للنص */
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5), 0 0 30px var(--accent-glow);
+        }
+
+        header h1 span { 
+            color: rgba(255, 255, 255, 0.15); 
+            font-weight: 200;
+        }
+
+        header p { 
+            color: var(--text-muted); 
+            font-size: 1rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* تصميم بانل زجاجي (Glassmorphism) مناسب للفضاء */
+        .cosmic-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(10px); /* تأثير ضبابي خلف البانل */
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+            transition: all 0.3s ease;
+        }
+
+        /* --- منطقة السحب والإفلات: تصميم الثقب الأسود --- */
+        #drop-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            text-align: center;
+            background: radial-gradient(circle at center, #000 30%, #050505 60%, transparent 100%);
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* تأثير التوهج عند سحب ملف فوقه (Event Horizon) */
+        #drop-zone:hover, #drop-zone.dragover { 
+            border-color: var(--accent-glow); 
+            box-shadow: 0 0 30px rgba(125, 175, 255, 0.2);
+        }
+
+        /* إضافة حلقة باهتة تدور حول الثقب الأسود (تمثيلية) */
+        #drop-zone::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 120%; height: 120%;
+            transform: translate(-50%, -50%) rotate(0deg);
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(125, 175, 255, 0.05) 50%, transparent 60%);
+            animation: rotateDisk 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotateDisk {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .drop-content { 
+            pointer-events: none; 
+            position: relative; z-index: 2;
+        }
+
+        .drop-content svg { 
+            margin-bottom: 1.5rem; 
+            color: var(--accent-star); 
+            opacity: 0.9;
+            filter: drop-shadow(0 0 5px var(--accent-glow));
+        }
+
+        .drop-content h3 {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* ------------------------------------------------ */
+
+        .hidden { 
+            display: none !important; 
+        }
+
+        #loading { 
+            text-align: center; 
+            margin: 4rem 0; 
+        }
+
+        .spinner { 
+            width: 50px; 
+            height: 50px; 
+            border: 2px solid rgba(255,255,255,0.05); 
+            border-top-color: var(--accent-star); 
+            border-radius: 50%; 
+            animation: spin 0.8s linear infinite; 
+            margin: 0 auto 1.5rem; 
+            filter: drop-shadow(0 0 10px var(--accent-glow));
+        }
+
+        @keyframes spin { 
+            to { transform: rotate(360deg); } 
+        }
+
+        .grid-layout { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+            gap: 2rem; 
+            margin-top: 3rem; 
+        }
+
+        .app-card { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 1.5rem; 
+            position: relative; 
+            overflow: hidden; 
+        }
+
+        /* تأثير توهج خفيف عند الحوم فوق البطاقة */
+        .app-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
+
+        .app-header { 
+            display: flex; 
+            align-items: center; 
+            gap: 1.2rem; 
+        }
+
+        .app-icon { 
+            width: 64px; 
+            height: 64px; 
+            border-radius: 14px; 
+            object-fit: cover; 
+            background: #000; 
+            border: 1px solid var(--panel-border);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .app-info h3 { 
+            font-size: 1.2rem; 
+            font-weight: 700;
+            margin-bottom: 0.2rem; 
+            word-break: break-all;
+            color: var(--accent-star);
+        }
+
+        .app-info p { 
+            font-size: 0.8rem; 
+            color: var(--text-muted); 
+            word-break: break-all;
+            font-family: monospace; 
+        }
+
+        .input-group { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 0.75rem; 
+        }
+
+        .input-group label { 
+            font-size: 0.75rem; 
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted); 
+        }
+
+        .input-group input { 
+            background: rgba(0, 0, 0, 0.3); 
+            border: 1px solid var(--panel-border); 
+            color: var(--accent-star); 
+            padding: 1rem; 
+            border-radius: 8px; 
+            outline: none; 
+            font-family: monospace;
+            font-size: 0.9rem;
+            transition: all 0.3s; 
+        }
+
+        .input-group input:focus { 
+            border-color: rgba(125, 175, 255, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .btn { 
+            background: var(--accent-star); 
+            color: var(--btn-text); 
+            border: none; 
+            padding: 1rem; 
+            border-radius: 8px; 
+            font-weight: 800; 
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 0.5rem; 
+            width: 100%;
+            /* توهج افتراضي خفيف */
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:hover { 
+            background: #ffffff;
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.4), 0 0 10px var(--accent-glow);
+            transform: scale(1.02);
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--accent-star);
+            border: 1px solid var(--panel-border);
+            box-shadow: none;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent-star);
+            background: rgba(255,255,255,0.03);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .result-area { 
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 1.5rem; 
+            margin-top: 0.5rem; 
+            padding-top: 1.5rem; 
+            border-top: 1px solid var(--panel-border); 
+        }
+
+        .qr-container { 
+            background: #fff; 
+            padding: 10px; 
+            border-radius: 8px; 
+            box-shadow: 0 0 20px rgba(125, 175, 255, 0.2);
+        }
+
+        .toast { 
+            position: fixed; 
+            bottom: 30px; 
+            left: 50%;
+            transform: translateX(-50%) translateY(100px); 
+            background: var(--panel-bg); 
+            border: 1px solid var(--panel-border); 
+            color: var(--accent-star); 
+            padding: 1rem 2rem; 
+            border-radius: 30px; 
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+            z-index: 2000; 
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.error {
+            border-color: var(--error-nova);
+            color: var(--error-nova);
+            text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+        }
+
+        @media (max-width: 600px) {
+            .grid-layout { grid-template-columns: 1fr; }
+            body { padding: 1rem; }
+            header h1 { font-size: 2.5rem; letter-spacing: 2px; }
+            .cosmic-panel { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="space-background">
+        <div class="stars-sm"></div>
+        <div class="stars-md"></div>
+        <div class="stars-lg"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>OTA <span>BLACK</span></h1>
+            <p>CONVERGE. DEPLOY. INSTALL. FROM THE VOID.</p>
+        </header>
+
+        <div id="drop-zone" class="cosmic-panel">
+            <div class="drop-content">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v8M12 2l3 3M12 2l-3 3"/>
+                    <path d="M20.5 10a9 9 0 1 1-17 0"/>
+                </svg>
+                <h3>FEED THE SINGULARITY</h3>
+                <p>Drop .ipa files to begin decryption</p>
+                <input type="file" id="file-input" multiple accept=".ipa" hidden>
+            </div>
+        </div>
+
+        <div id="loading" class="hidden">
+            <div class="spinner"></div>
+            <p style="color: var(--text-muted); font-family: monospace; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px;">MAPING APP STRUCTURE...</p>
+        </div>
+
+        <div id="apps-container" class="grid-layout"></div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropZone = document.getElementById('drop-zone');
+            const fileInput = document.getElementById('file-input');
+            const loading = document.getElementById('loading');
+            const appsContainer = document.getElementById('apps-container');
+
+            // إعداد الـ Drag and Drop
+            dropZone.addEventListener('click', () => fileInput.click());
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                handleFiles(files);
+            });
+
+            fileInput.addEventListener('change', function() {
+                handleFiles(this.files);
+            });
+
+            async function handleFiles(files) {
+                const ipaFiles = Array.from(files).filter(file => file.name.toLowerCase().endsWith('.ipa'));
+                
+                if (ipaFiles.length === 0) {
+                    showToast('ERROR: DATA STREAM INVALID. .IPA REQUIRED.', true);
+                    return;
+                }
+
+                loading.classList.remove('hidden');
+
+                for (const file of ipaFiles) {
+                    try {
+                        const parser = new AppInfoParser(file);
+                        const result = await parser.parse();
+                        createAppCard(result, file.name);
+                    } catch (error) {
+                        console.error('Error parsing IPA:', error);
+                        showToast(`CRITICAL: DECRYPTION FAILED ON ${file.name.substring(0, 10)}...`, true);
+                    }
+                }
+
+                loading.classList.add('hidden');
+                fileInput.value = '';
+            }
+
+            function createAppCard(appData, filename) {
+                const bundleId = appData.CFBundleIdentifier || 'Unknown Singularity';
+                const version = appData.CFBundleShortVersionString || '1.0';
+                const appName = appData.CFBundleName || appData.CFBundleDisplayName || filename.replace('.ipa', '');
+                
+                // صورة صامتة سوداء تماماً في حال عدم وجود أيقونة
+                const iconSrc = appData.icon ? appData.icon : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+
+                const card = document.createElement('div');
+                card.className = 'cosmic-panel app-card';
+
+                card.innerHTML = `
+                    <div class="app-header">
+                        <img src="${iconSrc}" class="app-icon" alt="${appName}">
+                        <div class="app-info">
+                            <h3>${appName}</h3>
+                            <p>${bundleId}</p>
+                            <p>v${version}</p>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>DIRECT SOURCE COORDINATES (URL)</label>
+                        <input type="url" placeholder="https://..." class="ipa-url-input">
+                    </div>
+                    <button class="btn generate-btn">CALCULATE JUMP (MANIFEST)</button>
+                    <div class="result-area">
+                        <div class="qr-container"></div>
+                        <button class="btn btn-outline copy-btn">COPY BEACON LINK</button>
+                    </div>
+                `;
+
+                appsContainer.prepend(card);
+
+                const generateBtn = card.querySelector('.generate-btn');
+                const urlInput = card.querySelector('.ipa-url-input');
+                const resultArea = card.querySelector('.result-area');
+                const qrContainer = card.querySelector('.qr-container');
+                const copyBtn = card.querySelector('.copy-btn');
+
+                generateBtn.addEventListener('click', () => {
+                    const ipaUrl = urlInput.value.trim();
+                    
+                    if (!ipaUrl || !ipaUrl.startsWith('http')) {
+                        showToast('ERROR: INVALID PROTOCOL. HTTP/HTTPS REQUIRED.', true);
+                        urlInput.focus();
+                        return;
+                    }
+
+                    const apiBase = window.location.origin;
+                    
+                    // 🔥 ضبط الاسم ليكون دائماً "هذا التطبيق" في رابط الـ Manifest 🔥
+                    const manifestParams = new URLSearchParams({
+                        ipa_url: ipaUrl,
+                        bundle_id: bundleId,
+                        version: version,
+                        app_name: "هذا التطبيق" 
+                    });
+
+                    const manifestUrl = `${apiBase}/api/manifest?${manifestParams.toString()}`;
+                    const itmsLink = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestUrl)}`;
+
+                    qrContainer.innerHTML = ''; 
+                    new QRCode(qrContainer, {
+                        text: itmsLink,
+                        width: 150,
+                        height: 150,
+                        colorDark : "#000000",
+                        colorLight : "#ffffff", 
+                        correctLevel : QRCode.CorrectLevel.L
+                    });
+
+                    resultArea.style.display = 'flex';
+                    generateBtn.style.display = 'none';
+                    urlInput.setAttribute('readonly', 'true');
+                    urlInput.style.opacity = '0.4';
+
+                    copyBtn.onclick = () => {
+                        navigator.clipboard.writeText(itmsLink).then(() => {
+                            showToast('BEACON LINK SECURED TO CLIPBOARD.');
+                            copyBtn.textContent = 'LINK SECURED';
+                            copyBtn.style.background = 'var(--accent-glow)';
+                            copyBtn.style.color = '#000';
+                            copyBtn.style.borderColor = 'var(--accent-glow)';
+                            setTimeout(() => {
+                                copyBtn.textContent = 'COPY BEACON LINK';
+                                copyBtn.style.background = 'transparent';
+                                copyBtn.style.color = 'var(--accent-star)';
+                                copyBtn.style.borderColor = 'var(--panel-border)';
+                            }, 2000);
+                        }).catch(err => {
+                            console.error('Failed to copy', err);
+                            showToast('ERROR: SIGNAL COPY FAILED.', true);
+                        });
+                    };
+                });
+            }
+
+            let toastTimeout;
+            function showToast(message, isError = false) {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                
+                if(isError) {
+                    toast.classList.add('error');
+                } else {
+                    toast.classList.remove('error');
+                }
+                
+                toast.classList.add('show');
+                
+                clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 4000);
+            }
+        });
+    </script>
+</body>
+</html>
