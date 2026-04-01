@@ -7,7 +7,6 @@
     <script src="https://unpkg.com/app-info-parser@1.1.7/dist/app-info-parser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        /* === تصميم الماكينة المطلقة (Ultimate Design System) === */
         :root {
             --bg-void: #000000;
             --glass-bg: rgba(10, 10, 12, 0.65);
@@ -18,7 +17,7 @@
             --terminal-red: #ff3333;
             --text-main: #f5f5f7;
             --text-muted: #86868b;
-            --bezier-fluid: cubic-bezier(0.25, 1, 0.5, 1); /* حركة Apple الانسيابية */
+            --bezier-fluid: cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; }
@@ -44,13 +43,11 @@
 
         header h1 { 
             font-size: 4.5rem; font-weight: 900; letter-spacing: -2px; 
-            margin-bottom: 0.5rem;
-            text-shadow: 0 0 50px rgba(255, 255, 255, 0.1);
+            margin-bottom: 0.5rem; text-shadow: 0 0 50px rgba(255, 255, 255, 0.1);
         }
         header h1 span { color: var(--text-muted); font-weight: 300; }
         header p { color: var(--accent-glow); font-family: monospace; letter-spacing: 4px; font-size: 0.9rem; text-transform: uppercase; }
 
-        /* === منطقة السحب المتطورة === */
         .void-panel {
             background: var(--glass-bg); border: 1px solid var(--glass-border);
             border-radius: 24px; padding: 3rem;
@@ -72,8 +69,7 @@
         }
 
         #drop-zone:hover, #drop-zone.dragover { 
-            border-color: var(--accent-glow); background: rgba(0, 0, 0, 0.4);
-            transform: scale(1.01);
+            border-color: var(--accent-glow); background: rgba(0, 0, 0, 0.4); transform: scale(1.01);
         }
         #drop-zone:hover::after { opacity: 1; }
 
@@ -82,7 +78,6 @@
         .drop-text h3 { font-size: 1.5rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 0.5rem; }
         .drop-text p { color: var(--text-muted); font-family: monospace; font-size: 0.85rem; }
 
-        /* === التيرمنال الحقيقي (Live Console) === */
         .terminal-container {
             margin-top: 1.5rem; background: #000; border: 1px solid #1a1a1a;
             border-radius: 12px; height: 160px; padding: 1.5rem;
@@ -97,7 +92,6 @@
         .cursor { display: inline-block; width: 8px; height: 14px; background: var(--terminal-green); animation: blink 1s step-end infinite; vertical-align: middle; margin-left: 2px;}
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-        /* === البطاقات (Cards) === */
         .apps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 2rem; margin-top: 3rem; }
         
         .app-card { padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem; animation: popIn 0.6s var(--bezier-fluid); }
@@ -155,7 +149,7 @@
     <div class="container">
         <header>
             <h1>OTA <span>BLACK</span></h1>
-            <p>VOID PLATFORM • ENTERPRISE DEPLOYMENT</p>
+            <p>VOID PLATFORM • SECURE DEPLOYMENT</p>
         </header>
 
         <div class="void-panel">
@@ -181,9 +175,6 @@
     <div id="toast-container" class="toast-container"></div>
 
     <script>
-        // ==========================================
-        // OTA BLACK - ENTERPRISE CORE ENGINE
-        // ==========================================
         class OTADeployer {
             constructor() {
                 this.dropZone = document.getElementById('drop-zone');
@@ -259,13 +250,12 @@
                 lineObj.appendChild(cursor);
                 this.terminal.appendChild(lineObj);
 
-                // تأثير الكتابة (Typing Effect)
                 for (let i = 0; i < text.length; i++) {
-                    await new Promise(r => setTimeout(r, 15)); // سرعة الكتابة
+                    await new Promise(r => setTimeout(r, 10)); 
                     msgSpan.textContent += text.charAt(i);
                     this.terminal.scrollTop = this.terminal.scrollHeight;
                 }
-                cursor.remove(); // إزالة المؤشر من السطر القديم
+                cursor.remove(); 
             }
 
             async processFiles(files) {
@@ -279,7 +269,7 @@
 
                 this.isProcessing = true;
                 this.terminal.innerHTML = ''; 
-                await this.typeTerminalLine(`INITIATING VOID ENGINE... v2.0`, 'info');
+                await this.typeTerminalLine(`INITIATING VOID ENGINE SECURE PROTOCOL...`, 'info');
                 await this.typeTerminalLine(`DETECTED ${ipaFiles.length} PAYLOAD(S).`, 'info');
 
                 for (const file of ipaFiles) {
@@ -329,7 +319,7 @@
                         </div>
                     </div>
                     <div class="input-group">
-                        <label>DIRECT SOURCE URL</label>
+                        <label>DIRECT SOURCE URL (.IPA)</label>
                         <input type="url" class="url-input" placeholder="https://cdn.example.com/app.ipa" autocomplete="off" spellcheck="false">
                     </div>
                     <button class="btn generate-btn">
@@ -342,22 +332,33 @@
                             <button class="btn btn-outline edit-btn">EDIT</button>
                             <button class="btn copy-btn">COPY BEACON</button>
                         </div>
+                        <div class="sync-section" style="margin-top: 1rem; padding-top: 1.5rem; border-top: 1px dashed var(--glass-border); width: 100%;">
+                            <div class="input-group">
+                                <label style="color: var(--accent-glow);">TARGET ENDPOINT (API / WEBHOOK URL)</label>
+                                <input type="url" class="api-endpoint-input" placeholder="https://your-webhook-or-api.com/..." autocomplete="off" spellcheck="false" style="border-color: rgba(26,115,232,0.3);">
+                            </div>
+                            <button class="btn sync-btn" style="margin-top: 1rem; background: var(--accent-glow); color: #fff; border: 1px solid var(--accent-glow);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
+                                SECURE TRANSMIT TO STORE
+                            </button>
+                        </div>
                     </div>
                 `;
 
                 this.appsContainer.prepend(card);
-                this.attachCardEvents(card, bundleId, version);
+                this.attachCardEvents(card, bundleId, version, appName, iconSrc);
             }
 
-            attachCardEvents(card, bundleId, version) {
+            attachCardEvents(card, bundleId, version, appName, iconSrc) {
                 const urlInput = card.querySelector('.url-input');
                 const generateBtn = card.querySelector('.generate-btn');
                 const resultZone = card.querySelector('.result-zone');
                 const qrWrapper = card.querySelector('.qr-wrapper');
                 const copyBtn = card.querySelector('.copy-btn');
                 const editBtn = card.querySelector('.edit-btn');
+                const syncBtn = card.querySelector('.sync-btn');
+                const apiEndpointInput = card.querySelector('.api-endpoint-input');
 
-                // Real-time Validation
                 urlInput.addEventListener('input', (e) => {
                     const val = e.target.value.trim();
                     if(val === '') { urlInput.className = 'url-input'; }
@@ -365,31 +366,26 @@
                     else { urlInput.className = 'url-input invalid'; }
                 });
 
+                const getItmsLink = () => {
+                    const manifestParams = new URLSearchParams({ ipa_url: urlInput.value.trim(), bundle_id: bundleId, version: version, app_name: appName });
+                    return `itms-services://?action=download-manifest&url=${encodeURIComponent(window.location.origin + '/api/manifest?' + manifestParams.toString())}`;
+                };
+
                 const buildManifest = async () => {
-                    const ipaUrl = urlInput.value.trim();
-                    if (!ipaUrl.startsWith('https://')) {
+                    if (!urlInput.value.trim().startsWith('https://')) {
                         this.showToast('SECURE CONNECTION (HTTPS) REQUIRED BY APPLE.');
                         urlInput.focus();
                         return;
                     }
-
                     await this.typeTerminalLine(`COMPILING XML MANIFEST...`, 'info');
-
-                    const manifestParams = new URLSearchParams({
-                        ipa_url: ipaUrl, bundle_id: bundleId, version: version, app_name: "هذا التطبيق" 
-                    });
                     
-                    const manifestUrl = `${window.location.origin}/api/manifest?${manifestParams.toString()}`;
-                    const itmsLink = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestUrl)}`;
-
                     qrWrapper.innerHTML = ''; 
-                    new QRCode(qrWrapper, { text: itmsLink, width: 140, height: 140, colorDark : "#000", colorLight : "#fff", correctLevel : QRCode.CorrectLevel.L });
+                    new QRCode(qrWrapper, { text: getItmsLink(), width: 140, height: 140, colorDark : "#000", colorLight : "#fff", correctLevel : QRCode.CorrectLevel.L });
 
                     resultZone.style.display = 'flex';
                     generateBtn.style.display = 'none';
                     urlInput.setAttribute('readonly', 'true');
                     urlInput.style.opacity = '0.5';
-                    
                     await this.typeTerminalLine(`DEPLOYMENT BEACON GENERATED SUCCESSFULLY.`, 'info');
                 };
 
@@ -405,10 +401,7 @@
                 });
 
                 copyBtn.addEventListener('click', () => {
-                    const manifestParams = new URLSearchParams({ ipa_url: urlInput.value.trim(), bundle_id: bundleId, version: version, app_name: "هذا التطبيق" });
-                    const itmsLink = `itms-services://?action=download-manifest&url=${encodeURIComponent(window.location.origin + '/api/manifest?' + manifestParams.toString())}`;
-
-                    navigator.clipboard.writeText(itmsLink).then(() => {
+                    navigator.clipboard.writeText(getItmsLink()).then(() => {
                         this.showToast('BEACON COPIED TO CLIPBOARD');
                         const originalText = copyBtn.textContent;
                         copyBtn.textContent = 'SECURED';
@@ -419,10 +412,81 @@
                         }, 2000);
                     });
                 });
+
+                // 🔥 منطق المزامنة الآمنة عبر البروكسي (Backend Proxy Sync) 🔥
+                syncBtn.addEventListener('click', async () => {
+                    const endpointUrl = apiEndpointInput.value.trim();
+
+                    if (!endpointUrl || !endpointUrl.startsWith('http')) {
+                        this.showToast('ERROR: INVALID TARGET ENDPOINT URL.');
+                        apiEndpointInput.focus();
+                        apiEndpointInput.style.borderColor = 'var(--terminal-red)';
+                        setTimeout(() => apiEndpointInput.style.borderColor = 'rgba(26,115,232,0.3)', 2000);
+                        return;
+                    }
+
+                    const appData = {
+                        name: appName,
+                        bundle_id: bundleId,
+                        version: version,
+                        icon_url: iconSrc,
+                        direct_ipa_url: urlInput.value.trim(),
+                        install_button_link: getItmsLink(),
+                        timestamp: new Date().toISOString()
+                    };
+
+                    try {
+                        const originalText = syncBtn.innerHTML;
+                        syncBtn.innerHTML = 'SECURE SYNCING...';
+                        syncBtn.style.opacity = '0.7';
+                        syncBtn.style.pointerEvents = 'none';
+
+                        await this.typeTerminalLine(`INITIATING SECURE PROXY CONNECTION TO TARGET...`, 'warn');
+
+                        // إرسال البيانات للوسيط (api/sync.js) في Vercel وليس للخارج مباشرة
+                        const response = await fetch('/api/sync', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                targetUrl: endpointUrl,
+                                appData: appData
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok && result.success) {
+                            this.showToast('SECURE PAYLOAD TRANSMITTED!');
+                            await this.typeTerminalLine(`SUCCESS: DB UPDATED VIA SECURE PROXY.`, 'info');
+                            syncBtn.innerHTML = 'TRANSMITTED ✔';
+                            syncBtn.style.background = 'var(--terminal-green)';
+                            syncBtn.style.color = '#000';
+                            syncBtn.style.borderColor = 'var(--terminal-green)';
+                        } else {
+                            throw new Error(result.error || 'Unknown server error');
+                        }
+
+                    } catch (error) {
+                        console.error('Secure Transmission Error:', error);
+                        this.showToast('ERROR: SECURE TRANSMISSION FAILED.');
+                        await this.typeTerminalLine(`CRITICAL: SECURE PROXY REJECTED CONNECTION.`, 'error');
+                        syncBtn.innerHTML = 'TRANSMISSION FAILED ✖';
+                        syncBtn.style.background = 'var(--terminal-red)';
+                        syncBtn.style.borderColor = 'var(--terminal-red)';
+                        
+                        setTimeout(() => {
+                            syncBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg> SECURE TRANSMIT TO STORE';
+                            syncBtn.style.background = 'var(--accent-glow)';
+                            syncBtn.style.color = '#fff';
+                            syncBtn.style.borderColor = 'var(--accent-glow)';
+                            syncBtn.style.opacity = '1';
+                            syncBtn.style.pointerEvents = 'auto';
+                        }, 3000);
+                    }
+                });
             }
         }
 
-        // Initialize the Core Engine
         const otaEngine = new OTADeployer();
     </script>
 </body>
